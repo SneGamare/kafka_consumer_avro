@@ -1,0 +1,18 @@
+# AWS MSK Configuration Values
+MSK_BROKER_STRING: msk-plutus-dev-01.${MSK_BROKER_STRING_SUFFIX}.ap-south-1.amazonaws.com:9096
+MSK_ZOOKEEPER_STRING: z-1.msk-plutus-dev-01.${MSK_ZOOKEEPER_STRING_SUFFIX}.ap-south-1.amazonaws.com:2181,z-2.msk-plutus-dev-01.${MSK_ZOOKEEPER_STRING_SUFFIX}.ap-south-1.amazonaws.com:2181,z-3.msk-plutus-dev-01.${MSK_ZOOKEEPER_STRING_SUFFIX}.ap-south-1.amazonaws.com:2181
+SCHEMA_REGISTRY_URL: http://schema-registry:8081
+
+# AWS Account and Environment
+AWS_ACCOUNT_ID: 977098984058
+ENVIRONMENT: NonProd-Dev
+
+# SSL Configuration
+TRUSTSTORE_LOCATION: ./config/msk-truststore.jks
+TRUSTSTORE_PASSWORD: your-truststore-password
+KEYSTORE_LOCATION: ./config/msk-keystore.jks
+KEYSTORE_PASSWORD: your-keystore-password
+KEY_PASSWORD: your-key-password
+
+# AWS Region
+AWS_REGION: ap-south-1 
