@@ -1,0 +1,120 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: transaction-service
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: ${MSK_BROKER_STRING}
+    properties:
+      security:
+        protocol: SSL
+      ssl:
+        truststore:
+          location: ${TRUSTSTORE_LOCATION}
+          password: ${TRUSTSTORE_PASSWORD}
+        keystore:
+          location: ${KEYSTORE_LOCATION}
+          password: ${KEYSTORE_PASSWORD}
+        key:
+          password: ${KEY_PASSWORD}
+    consumer:
+      group-id: plutus-group
+      auto-offset-reset: earliest
+      properties:
+        specific:
+          avro:
+            reader: true
+        schema:
+          registry:
+            url: ${SCHEMA_REGISTRY_URL}
+        key:
+          deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value:
+          deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+    producer:
+      properties:
+        schema:
+          registry:
+            url: ${SCHEMA_REGISTRY_URL}
+        key:
+          serializer: org.apache.kafka.common.serialization.StringSerializer
+        value:
+          serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+        specific:
+          avro:
+            writer: true
+
+  # Spring Cloud Stream Configuration
+  cloud:
+    function:
+      definition: processTransaction;sendTransaction
+    stream:
+      kafka:
+        binder:
+          brokers: ${MSK_BROKER_STRING}
+          configuration:
+            security:
+              protocol: SSL
+            ssl:
+              truststore:
+                location: ${TRUSTSTORE_LOCATION}
+                password: ${TRUSTSTORE_PASSWORD}
+              keystore:
+                location: ${KEYSTORE_LOCATION}
+                password: ${KEYSTORE_PASSWORD}
+              key:
+                password: ${KEY_PASSWORD}
+          zk-nodes: ${MSK_ZOOKEEPER_STRING}
+      bindings:
+        processTransaction-in-0:
+          destination: transactions
+          group: transaction-group
+          contentType: application/*+avro
+        sendTransaction-out-0:
+          destination: transactions
+          contentType: application/*+avro
+        transaction-out-0:
+          destination: transactions
+          content-type: application/*+avro
+        transaction-in-0:
+          destination: transactions
+          content-type: application/*+avro
+          group: transaction-group
+      default-binder: kafka
+
+# AWS Configuration
+aws:
+  account:
+    id: ${AWS_ACCOUNT_ID}
+  region: ${AWS_REGION}
+  environment: ${ENVIRONMENT}
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.plutus.kotak.commonlibs: DEBUG
+    org.springframework.kafka: DEBUG
+    org.springframework.cloud.stream: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE 
